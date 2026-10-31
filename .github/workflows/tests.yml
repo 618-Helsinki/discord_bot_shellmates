@@ -20,5 +20,4 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
       - run: python -m pip install -r requirements.txt
-      # The suite uses mocks only: no Discord token or Google credentials are needed.
       - run: python -m pytest -v

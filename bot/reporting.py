@@ -36,7 +36,7 @@ def format_summary(report: SyncReport) -> str:
             f"Roles removed: {report.roles_removed}",
         ]
     lines += [
-        f"Members modified: {report.members_processed}",
+        f"Members processed: {report.members_processed}",
         f"Members unchanged: {report.members_unchanged}",
         f"Records skipped: {report.members_skipped}",
         *([f"Invalid roles skipped: {len(report.skipped_roles)}"] if report.skipped_roles else []),
@@ -83,7 +83,7 @@ def format_detailed_report(report: SyncReport) -> str:
             f"Planned removals  : {report.planned_removals}",
         ]
     else:
-        out += [f"Roles added       : {report.roles_added}", f"  Roles removed     : {report.roles_removed}"]
+        out += [f"Roles added       : {report.roles_added}", f"Roles removed     : {report.roles_removed}"]
     out.append(f"Errors            : {len(report.errors)}")
 
     if report.warnings:
