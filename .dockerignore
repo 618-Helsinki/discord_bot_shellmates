@@ -1,0 +1,24 @@
+# Git and GitHub
+.git/
+.github/
+
+# Python environments and cache
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Tests
+tests/
+
+# Sensitive local configuration and secrets
+.env
+.env.*
+!.env.example
+credentials/*.json
+
+# Runtime logs
+logs/*.log
+*.log
+

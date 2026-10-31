@@ -227,3 +227,24 @@ def test_error_messages_do_not_leak_exception_details():
     with pytest.raises(SheetsError) as exc:
         make_client(authorize=MagicMock(side_effect=ValueError(secret))).read_rows()
     assert secret not in str(exc.value)
+
+
+def test_sample_members_csv_file_is_valid():
+    import csv
+    from pathlib import Path
+
+    csv_path = Path(__file__).resolve().parent.parent / "sample_data" / "sample_members.csv"
+    assert csv_path.is_file()
+    with csv_path.open("r", encoding="utf-8") as f:
+        rows = list(csv.reader(f))
+
+    sheet_data = parse_sheet(rows)
+    assert len(sheet_data.issues) == 0
+    assert len(sheet_data.records) == 5
+    by_user = {r.username: r for r in sheet_data.records}
+    assert by_user["member1"].roles == ("Developer",)
+    assert by_user["member2"].roles == ("Designer",)
+    assert by_user["member3"].roles == ("Developer", "Content")
+    assert by_user["member4"].discord_id == 123456789012345678
+    assert by_user["member5"].roles == ()
+

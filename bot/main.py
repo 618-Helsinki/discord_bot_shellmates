@@ -109,7 +109,7 @@ class HRBot(discord.Client):
 
     async def _on_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
         logger.error("Command error: %s", type(error).__name__, exc_info=error)
-        message = "Command failed try again or contact an admin."
+        message = "Command failed. Please try again or contact an administrator."
         try:
             if interaction.response.is_done():
                 await interaction.followup.send(message, ephemeral=True)

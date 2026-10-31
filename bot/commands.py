@@ -16,8 +16,8 @@ _audit = logging.getLogger(AUDIT_LOGGER_NAME)
 
 BUSY_MESSAGE = "Please wait to finish and try again."
 GENERIC_ERROR_MESSAGE = (
-    "Something went wrong (No changes)"
-    "check the bot's log or ask admin."
+    "Something went wrong (no roles were changed). "
+    "Please check the bot's logs or contact an administrator."
 )
 
 GatewayFactory = Callable[[discord.Guild], object]
@@ -72,9 +72,10 @@ class CommandHandlers:
             return
 
         await interaction.response.defer(ephemeral=True, thinking=True)
-        await interaction.followup.send("Reading the spreadsheet(no changes will be applied)"
+        await interaction.followup.send(
+            "Reading the spreadsheet (no changes will be applied)..."
             if dry_run
-            else "Reading the spreadsheet and synchronizing roles.",
+            else "Reading the spreadsheet and synchronizing roles...",
             ephemeral=True,
         )
 
@@ -127,7 +128,7 @@ class CommandHandlers:
             inspection = await self._service.inspect_member(gateway, snapshot_from_member(member))
         except FatalSyncError as exc:
             lines = "\n".join(f"• {p}" for p in exc.problems)
-            await interaction.followup.send(truncate(f"Couldnt check the member.\n{lines}"), ephemeral=True)
+            await interaction.followup.send(truncate(f"Couldn't check the member.\n{lines}"), ephemeral=True)
             return
         except Exception:
             logger.exception("Unexpected error during check-member")

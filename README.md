@@ -47,6 +47,7 @@ to the bot.
 | `/check-member` | Optional (implemented) |
 | Scheduled sync (`ENABLE_SCHEDULED_SYNC`, off by default) | Optional (implemented) |
 | Role grant when a member joins (`ENABLE_JOIN_SYNC`, off by default) | Optional (implemented) |
+| Dockerfile & Docker Compose deployment | Optional (implemented, see §7.1) |
 | GitHub Actions test workflow | Optional (implemented, see §12) |
 
 ---
@@ -217,6 +218,34 @@ Successful startup looks like:
 The bot shows as online and `/sync-roles`, `/preview-sync`, `/check-member` appear
 in your server (slash commands can take a minute to show; restart your Discord
 client if they do not).
+
+### 7.1. Running with Docker (Optional)
+
+You can also run the bot in a container without installing Python locally:
+
+**With Docker Compose:**
+```bash
+docker compose up -d
+```
+
+**With Docker directly:**
+```bash
+# Build the image
+docker build -t discord-hr-bot .
+
+# Run the container
+docker run -d \
+  --name discord_hr_role_bot \
+  --env-file .env \
+  -v "$(pwd)/credentials:/app/credentials:ro" \
+  -v "$(pwd)/logs:/app/logs" \
+  discord-hr-bot
+```
+
+View live logs:
+```bash
+docker logs -f discord_hr_role_bot
+```
 
 ---
 

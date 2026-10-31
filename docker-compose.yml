@@ -1,0 +1,11 @@
+services:
+  discord-hr-bot:
+    build: .
+    container_name: discord_hr_role_bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./credentials:/app/credentials:ro
+      - ./logs:/app/logs
+

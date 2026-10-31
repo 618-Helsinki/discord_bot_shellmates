@@ -1,4 +1,6 @@
-DISCORD USERNAME,ROLE
-member1,Developer
-member2,Designer
-member3,HR
+DISCORD USERNAME,ROLE,DISCORD ID
+member1,Developer,
+member2,Designer,
+member3,"Developer, Content",
+member4,HR,123456789012345678
+member5,,
