@@ -248,3 +248,93 @@ def test_sample_members_csv_file_is_valid():
     assert by_user["member4"].discord_id == 123456789012345678
     assert by_user["member5"].roles == ()
 
+
+def test_dynamic_large_sheet_with_350_arbitrary_members_and_custom_columns():
+    """Verify that sheet parsing is 100% dynamic and handles 300+ members, arbitrary roles,
+
+    re-ordered columns, and unrelated metadata columns (Email, Status, Department, Notes).
+    """
+    headers = [
+        "Full Name",
+        "DISCORD ID",
+        "Notes",
+        "ROLE",
+        "Email Address",
+        "DISCORD USERNAME",
+        "Status",
+    ]
+    rows = [headers]
+
+    roles_pool = ["AI Specialist", "Lead Architect", "Community Manager", "Core Team", "Mentor"]
+
+    for i in range(1, 351):
+        # Alternate formatting: some with @, some uppercase, some lowercase
+        prefix = "@" if i % 2 == 0 else ""
+        casing = str.upper if i % 3 == 0 else str.lower
+        raw_user = prefix + casing(f"User_Custom_{i:04d}")
+
+        # Alternate roles: 1 role, 2 roles, or 3 roles
+        chosen_roles = [roles_pool[(i + offset) % len(roles_pool)] for offset in range(1 + (i % 3))]
+        roles_str = ", ".join(chosen_roles)
+
+        discord_id = str(100000000000000000 + i) if i % 2 == 0 else ""
+
+        rows.append([
+            f"First Last {i}",
+            discord_id,
+            f"Internal club note {i}",
+            roles_str,
+            f"user_{i}@university.edu",
+            raw_user,
+            "Active" if i % 4 != 0 else "Alumni",
+        ])
+
+    data = parse_sheet(rows)
+
+    assert len(data.issues) == 0
+    assert len(data.records) == 350
+    assert data.empty_rows == 0
+
+    # Verify first, middle, and last records
+    first = data.records[0]
+    assert first.username == "user_custom_0001"
+    assert first.discord_id is None
+    assert first.roles == ("Lead Architect", "Community Manager")
+
+    even_member = data.records[1]
+    assert even_member.username == "user_custom_0002"
+    assert even_member.discord_id == 100000000000000002
+    assert even_member.roles == ("Community Manager", "Core Team", "Mentor")
+
+    last = data.records[349]
+    assert last.username == "user_custom_0350"
+    assert last.discord_id == 100000000000000350
+
+
+def test_dynamic_sheet_with_arbitrary_column_permutations():
+    """Verify any column order with arbitrary names and extra fields parses identically."""
+    import itertools
+
+    base_cols = ["DISCORD USERNAME", "ROLE", "DISCORD ID"]
+    extra_cols = ["Student ID", "Department", "Score"]
+
+    for perm in itertools.permutations(base_cols):
+        full_headers = list(perm) + extra_cols
+        rows = [
+            full_headers,
+            [
+                "alice" if h == "DISCORD USERNAME"
+                else "Sysadmin, Cloud" if h == "ROLE"
+                else "987654321098765432" if h == "DISCORD ID"
+                else "ignored_data"
+                for h in full_headers
+            ]
+        ]
+        data = parse_sheet(rows)
+        assert len(data.records) == 1
+        rec = data.records[0]
+        assert rec.username == "alice"
+        assert rec.roles == ("Sysadmin", "Cloud")
+        assert rec.discord_id == 987654321098765432
+
+
