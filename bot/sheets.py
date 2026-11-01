@@ -251,6 +251,19 @@ class SheetsClient:
             if status == 429:
                 raise SheetsError("Google Sheets rate limit reached. Try again in a minute.") from exc
             raise SheetsError(f"Google Sheets API error (HTTP {status}).") from exc
+        except PermissionError as exc:
+            cause = getattr(exc, "__cause__", None)
+            cause_msg = str(cause) if cause else str(exc)
+            logger.warning("Google permission error: %s", cause_msg)
+            if "has not been used in project" in cause_msg or "disabled" in cause_msg:
+                raise SheetsError(
+                    "Google Sheets API is not enabled in your Google Cloud project. "
+                    "Enable it in Google Cloud Console: APIs & Services -> Library -> Google Sheets API."
+                ) from exc
+            raise SheetsError(
+                "Google denied access (403 Forbidden). Share the sheet with the service account "
+                "email as Viewer and ensure the Google Sheets API is enabled."
+            ) from exc
         except FileNotFoundError as exc:
             raise SheetsError(
                 "Google service-account credentials file was not found "
