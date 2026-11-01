@@ -202,13 +202,19 @@ def resolve_managed_roles(
 ) -> tuple[list[RoleInfo], list[str]]:
     resolved: list[RoleInfo] = []
     problems: list[str] = []
-    for name in managed_names:
-        matches = [r for r in roles if role_key(r.name) == role_key(name)]
+    for identifier in managed_names:
+        ident_str = str(identifier).strip()
+        if ident_str.isdigit():
+            target_id = int(ident_str)
+            matches = [r for r in roles if r.id == target_id or role_key(r.name) == role_key(ident_str)]
+        else:
+            matches = [r for r in roles if role_key(r.name) == role_key(ident_str)]
+
         if not matches:
-            problems.append(f"Managed role '{name}' does not exist in this server.")
+            problems.append(f"Managed role '{identifier}' does not exist in this server.")
         elif len(matches) > 1:
             problems.append(
-                f"Managed role '{name}' is ambiguous: {len(matches)} server roles share that name."
+                f"Managed role '{identifier}' is ambiguous: {len(matches)} server roles share that name."
             )
         else:
             resolved.append(matches[0])

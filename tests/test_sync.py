@@ -5,6 +5,7 @@ import pytest
 from bot.sheets import MemberRecord, SheetsError, parse_sheet
 from bot.sync import (
     FatalSyncError,
+    RoleInfo,
     SyncBusyError,
     SyncService,
     build_plan,
@@ -172,6 +173,14 @@ def test_resolve_managed_roles_reports_missing_and_ambiguous():
     assert [r.name for r in resolved] == ["Developer"]
     assert any("Designer" in p and "does not exist" in p for p in problems)
     assert any("HR" in p and "ambiguous" in p for p in problems)
+
+
+def test_resolve_managed_roles_supports_both_names_and_numeric_ids():
+    roles = [RoleInfo("Developer", 101), RoleInfo("Designer", 102), RoleInfo("HR", 103)]
+    resolved, problems = resolve_managed_roles(["101", "Designer", "103"], roles)
+    assert [r.name for r in resolved] == ["Developer", "Designer", "HR"]
+    assert problems == []
+
 
 
 def sheet(*rows):
