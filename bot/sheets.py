@@ -110,12 +110,20 @@ def _find_columns(header_row: Sequence[Any]) -> tuple[int, int, int | None]:
             "Missing required column(s): " + ", ".join(missing) + ". "
             f"Row 1 must contain the headers '{USERNAME_HEADER}' and '{ROLE_HEADER}'."
         )
-    duplicated = [h for h in (USERNAME_HEADER, ROLE_HEADER, ID_HEADER) if len(positions.get(h, [])) > 1]
+
+    # Resolve ID column: exact "DISCORD ID" or variants like "DISCORD ID (OPTIONAL)"
+    id_keys = [k for k in positions if k == ID_HEADER or k.startswith(ID_HEADER)]
+    if len(id_keys) > 1 or any(len(positions[k]) > 1 for k in id_keys):
+        raise SheetValidationError(
+            f"Duplicate column header(s): {ID_HEADER}. Each header must appear once."
+        )
+    id_index = positions[id_keys[0]][0] if id_keys else None
+
+    duplicated = [h for h in (USERNAME_HEADER, ROLE_HEADER) if len(positions.get(h, [])) > 1]
     if duplicated:
         raise SheetValidationError(
             "Duplicate column header(s): " + ", ".join(duplicated) + ". Each header must appear once."
         )
-    id_index = positions[ID_HEADER][0] if ID_HEADER in positions else None
     return positions[USERNAME_HEADER][0], positions[ROLE_HEADER][0], id_index
 
 

@@ -81,6 +81,13 @@ def test_headers_case_and_whitespace_insensitive_and_reorderable():
     assert data.records[0].username == "member1" and data.records[0].roles == ("Developer",)
 
 
+def test_optional_label_in_discord_id_header_is_accepted():
+    rows = [["DISCORD USERNAME", "ROLE", "DISCORD ID (optional)"], ["alice", "Developer", GOOD_ID]]
+    data = parse_sheet(rows)
+    assert data.records[0].discord_id == int(GOOD_ID)
+
+
+
 @pytest.mark.parametrize(
     "header", [["ROLE"], ["DISCORD USERNAME"], ["Name", "Title"], []]
 )
