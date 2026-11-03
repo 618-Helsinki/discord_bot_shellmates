@@ -1,6 +1,7 @@
 import logging
 import subprocess
 import sys
+import os
 from pathlib import Path
 from unittest.mock import AsyncMock
 
@@ -53,19 +54,25 @@ def test_registered_secrets_are_redacted_from_logs(tmp_path, capsys):
 
 def test_start_without_config_fails_clearly_and_leaks_nothing(tmp_path):
     repo_root = Path(__file__).resolve().parents[1]
+
+    env = {
+        **os.environ,
+        "HOME": str(tmp_path),
+        "PYTHONPATH": str(repo_root),
+        "DISCORD_BOT_TOKEN": "",
+        "DISCORD_GUILD_ID": "",
+        "GOOGLE_SHEET_ID": "",
+    }
+
     result = subprocess.run(
         [sys.executable, "-m", "bot.main"],
         cwd=repo_root,
-        env={
-            "PATH": "",
-            "HOME": str(tmp_path),
-            "PYTHONPATH": str(repo_root),
-            "DISCORD_BOT_TOKEN": "",
-            "DISCORD_GUILD_ID": "",
-            "GOOGLE_SHEET_ID": "",
-        },
-        capture_output=True, text=True, timeout=10,
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=10,
     )
+
     assert result.returncode == 2
     assert "DISCORD_BOT_TOKEN is required" in result.stderr
 
